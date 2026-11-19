@@ -1,14 +1,17 @@
 FROM docker.io/cloudflare/sandbox:0.7.20
 
-# Install Node.js 24 & upgrade npm to v12 without hardcoded URLs
-RUN npm install -g n npm@12.2.3 \
+# 1. Install n and switch Node to 24.22.1 first
+RUN npm install -g n \
     && n 24.22.1 \
     && hash -r \
-    && node --version \
+    && node --version
+
+# 2. Now upgrade npm to v12 (on Node 24)
+RUN npm install -g npm@12.2.3 \
     && npm --version
 
-# Clean any pre-installed openclaw binary and install 2026.11.3
-ARG CACHE_BUST=2026-11-19-moltbot1sandbox-v4
+# 3. Clean any pre-installed openclaw binary and install 2026.11.3
+ARG CACHE_BUST=2026-11-19-moltbot1sandbox-v5
 RUN npm uninstall -g openclaw || true \
     && rm -f /usr/bin/openclaw /usr/local/bin/openclaw \
     && npm install -g openclaw@2026.11.3 \
