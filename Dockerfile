@@ -10,7 +10,7 @@ RUN ARCH="$(dpkg --print-architecture)" \
        esac \
     && apt-get update && apt-get install -y xz-utils ca-certificates \
     && rm -rf /usr/local/lib/node_modules /usr/local/bin/node /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /usr/local/bin/openclaw \
-    && curl -fsSLk https://nodejs.org{NODE_VERSION}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz -o /tmp/node.tar.xz \
+    && curl -fsSLk "https://nodejs.org{NODE_ARCH}.tar.xz" -o /tmp/node.tar.xz \
     && tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1 \
     && rm /tmp/node.tar.xz \
     && npm install -g npm@12.2.3 \
@@ -18,7 +18,7 @@ RUN ARCH="$(dpkg --print-architecture)" \
     && npm --version
 
 # Clean any pre-installed openclaw binary and install 2026.11.3
-ARG CACHE_BUST=2026-11-19-moltbot1sandbox-v1
+ARG CACHE_BUST=2026-11-19-moltbot1sandbox-v2
 RUN npm uninstall -g openclaw || true \
     && rm -f /usr/bin/openclaw /usr/local/bin/openclaw \
     && npm install -g openclaw@2026.11.3 \
