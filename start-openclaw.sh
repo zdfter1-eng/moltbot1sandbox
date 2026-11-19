@@ -86,7 +86,8 @@ config.channels = config.channels || {};
 // Gateway configuration
 config.gateway.port = 18789;
 config.gateway.mode = 'local';
-config.gateway.trustedProxies = ['127.0.0.1', '::1', '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16'];
+config.gateway.trustedProxies = ['127.0.0.1', '::1', '10.1.0.0'];
+
 
 
 config.gateway.controlUi = config.gateway.controlUi || {};
