@@ -477,11 +477,25 @@ app.all('*', async (c) => {
     });
   }
 
-  console.log('[HTTP] Proxying:', url.pathname + url.search);
+    console.log('[HTTP] Proxying:', url.pathname + url.search);
+
+  const cleanHeaders = new Headers(request.headers);
+  cleanHeaders.delete('x-forwarded-for');
+  cleanHeaders.delete('forwarded');
+  cleanHeaders.delete('x-real-ip');
+  cleanHeaders.delete('cf-connecting-ip');
+  cleanHeaders.set('x-forwarded-proto', 'https');
+  cleanHeaders.set('x-forwarded-host', url.host);
+
+  const proxyRequest = new Request(request.url, {
+    method: request.method,
+    headers: cleanHeaders,
+    body: request.body,
+  });
 
   let httpResponse: Response;
   try {
-    httpResponse = await sandbox.containerFetch(request, GATEWAY_PORT);
+    httpResponse = await sandbox.containerFetch(proxyRequest, GATEWAY_PORT);
   } catch (err) {
     if (isGatewayCrashedError(err)) {
       console.log('[HTTP] Gateway crashed, attempting restore + restart and retry...');
@@ -493,7 +507,7 @@ app.all('*', async (c) => {
       }
       await ensureGateway(sandbox, c.env);
       try {
-        httpResponse = await sandbox.containerFetch(request, GATEWAY_PORT);
+        httpResponse = await sandbox.containerFetch(proxyRequest, GATEWAY_PORT);
       } catch (retryErr) {
         console.error('[HTTP] Retry after restart also failed:', retryErr);
         if (acceptsHtml) return c.html(loadingPageHtml);
@@ -512,6 +526,7 @@ app.all('*', async (c) => {
     }
   }
   console.log('[HTTP] Response status:', httpResponse.status);
+
 
   // For HTML requests, verify we got actual content from the gateway.
   // containerFetch can return a 200 with empty/streaming body if the gateway's
